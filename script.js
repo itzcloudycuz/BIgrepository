@@ -82,22 +82,47 @@ rightGrid4.rotation.y = -Math.PI / 2;
 rightGrid4.position.set(gridSize / 2, gridSize / 2, -3 * gridSize);
 scene.add(rightGrid4);
 
-// Load the GLB model and apply a neon wireframe material
+// Animation mixer and clock
+let mixer = null;
+const clock = new THREE.Clock();
 const gltfLoader = new THREE.GLTFLoader();
-gltfLoader.load('https://cdn.devdojo.com/assets/3d/parrot.glb', function(gltf) {
+
+// Load the GLB model
+gltfLoader.load('./Synthwave bird.glb', function(gltf) {
     const model = gltf.scene;
-    model.traverse(function(child) {
-        if (child.isMesh) {
-            child.material = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true });
+    // const animations = gltf.animations;
+
+    // Check if animations exist
+    if (gltf.animations.length > 0) {
+        // console.log('Animations found:', animations);
+
+        // Create the animation mixer for the model
+        mixer = new THREE.AnimationMixer(model);
+
+        const action = mixer.clipAction(gltf.animations[2]);
+        action.play();
+        console.log(action)
+    } else {
+        console.warn('No animations found in the model.');
+    }
+
+    model.traverse((child)=>{
+        if(child.isMesh){
+            child.material.color.set('white');
         }
-    });
-    model.scale.set(0.2, 0.2, 0.2); // Scale the model as needed
-    model.position.set(0, 6, 0); // Position the model in the scene
+    })
+
+    // Scale the model to make it fit in the scene as needed
+    model.scale.set(8, 8, 5);
+
+    // Position the model above the grid in the scene
+    model.position.set(0, 6, 8);
+
+    // Add the model to the scene
     scene.add(model);
 }, undefined, function(error) {
     console.error('An error occurred while loading the model:', error);
 });
-
 // Light to illuminate the scene
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
@@ -108,12 +133,21 @@ scene.add(directionalLight);
 
 // Camera Position
 camera.position.z = 15;
-camera.position.y = 5;
-camera.lookAt(0, 5, 0);
+camera.position.y = 10;
+camera.lookAt(0, 6, 0);
 
 // Animation Loop
 function animate() {
     requestAnimationFrame(animate);
+
+    // Get the time delta for animation updates
+    const delta = clock.getDelta();
+
+    // Update the mixer to animate the model if available
+    if (mixer) {
+        mixer.update(delta);
+    }
+
 
     // Move the bottom grids to create a seamless scrolling effect
     ground1.position.z += 0.1;

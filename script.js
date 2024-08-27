@@ -6,6 +6,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
+
+// Add fog to the scene
+const fogColor = 0x000000; // fog color 
+const fogNear = 40; // Fog starting in world units
+const fogFar = 120; // end fog
+scene.fog = new THREE.Fog(fogColor, fogNear, fogFar);
+
 // Neon Grid Background
 const gridSize = 100; // Size of the grid
 const divisions = 50; // Number of divisions in the grid
